@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import Header from '@/components/functional/header';
+import Footer from '@/components/functional/footer';
 
 export const metadata: Metadata = {
   title: 'Shopdesk',
@@ -16,7 +17,8 @@ export default function RootLayout({
     <html lang='en'>
       <body>
         <Header />
-      {children}
+        {children}
+        <Footer />
       </body>
     </html>
   );
