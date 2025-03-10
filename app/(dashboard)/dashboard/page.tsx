@@ -23,9 +23,11 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  TableFooter,
 } from "@/components/ui/table";
 import useTableAreaHeight from "./hooks/useTableAreaHeight";
 import { deleteStock, GetStock } from "@/services/stock";
+import Pagination from "@/components/functional/pagination";
 
 const Page = () => {
   type StockItem = {
@@ -57,9 +59,22 @@ const Page = () => {
   const closeModal = () => setIsOpen(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
 
+  // pagination logic
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(Math.max(rowsPerPage, 10));
+  // const itemsPerPage = Math.max(rowsPerPage, 10)
+  const totalPages = Math.ceil(stockItems.length / itemsPerPage)
+  const getPaginatedItems = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return stockItems.slice(startIndex, endIndex)
+  }
+  const handlePageSizeChange = (newSize: number) => {
+    setCurrentPage(1)
+    setItemsPerPage(newSize)
+  }
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -125,6 +140,7 @@ const Page = () => {
       console.error("Error deleting stock:", error);
     }
   };
+ 
 
   if (isLoading) {
     return (
@@ -272,7 +288,7 @@ const Page = () => {
                 </div>
               </div>
             ) : (
-              <Table className="border-collapse  overflow-y-auto">
+              <Table className="  overflow-y-auto">
                 <TableHeader>
                   <TableRow className="h-[50px]">
                     <TableHead className="px-4 py-2 w-2/7 text-left border-b border-r">
@@ -289,11 +305,14 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody className=" border border-b-2">
                   {Array.from({
-                    length: Math.max(rowsPerPage, stockItems.length),
+                    //   length: Math.max(rowsPerPage, stockItems.length),
+                    // }).map((_, index) => {
+                    //   const item = stockItems[index] || null;
+                    length: Math.max(rowsPerPage, getPaginatedItems().length),
                   }).map((_, index) => {
-                    const item = stockItems[index] || null;
+                    const item = getPaginatedItems()[index] || null
                     return (
                       <TableRow key={index} className="h-[50px]">
                         <TableCell className="px-4 py-3 text-left border-r">
@@ -301,9 +320,8 @@ const Page = () => {
                         </TableCell>
                         <TableCell className="px-4 py-3 text-center border-r">
                           {item
-                            ? `${
-                                item.currency_code
-                              } ${item.buying_price?.toLocaleString()}`
+                            ? `${item.currency_code
+                            } ${item.buying_price?.toLocaleString()}`
                             : ""}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-center border-r hidden sm:table-cell">
@@ -338,6 +356,17 @@ const Page = () => {
                 </TableBody>
               </Table>
             )}
+            {stockItems.length > 0 ?
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={itemsPerPage}
+                totalItems={stockItems.length}
+                onPageChangeAction={setCurrentPage} 
+                onPageSizeChangeAction={handlePageSizeChange }      
+              /> :
+              <>  </>
+            }
           </div>
         </div>
       </div>
