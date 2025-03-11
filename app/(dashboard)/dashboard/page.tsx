@@ -23,28 +23,27 @@ import {
   TableRow,
   TableHead,
   TableCell,
-  TableFooter,
 } from "@/components/ui/table";
 import useTableAreaHeight from "./hooks/useTableAreaHeight";
 import { deleteStock, GetStock } from "@/services/stock";
 import Pagination from "@/components/functional/pagination";
 
+export type StockItem = {
+  id: string;
+  name: string;
+  buying_price: number;
+  quantity: number;
+  currency_code: string;
+  buying_date?: string;
+  product_id?: string;
+  status?: string;
+  user_id?: string;
+  date_created?: string;
+  original_quantity?: number;
+  supplier?: null | any;
+  timeslots?: any[];
+};
 const Page = () => {
-  type StockItem = {
-    id: string;
-    name: string;
-    buying_price: number;
-    quantity: number;
-    currency_code: string;
-    buying_date?: string;
-    product_id?: string;
-    status?: string;
-    user_id?: string;
-    date_created?: string;
-    original_quantity?: number;
-    supplier?: null | any;
-    timeslots?: any[];
-  };
 
   const { tableAreaRef, tableAreaHeight } = useTableAreaHeight();
   const rowsPerPage = Math.round(tableAreaHeight / 55) - 3;
@@ -59,6 +58,7 @@ const Page = () => {
   const closeModal = () => setIsOpen(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
 
   // pagination logic
@@ -67,10 +67,13 @@ const Page = () => {
   // const itemsPerPage = Math.max(rowsPerPage, 10)
   const totalPages = Math.ceil(stockItems.length / itemsPerPage)
   const getPaginatedItems = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    return stockItems.slice(startIndex, endIndex)
-  }
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return stockItems.slice(start, end);
+  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
   const handlePageSizeChange = (newSize: number) => {
     setCurrentPage(1)
     setItemsPerPage(newSize)
@@ -140,7 +143,6 @@ const Page = () => {
       console.error("Error deleting stock:", error);
     }
   };
- 
 
   if (isLoading) {
     return (
@@ -225,6 +227,7 @@ const Page = () => {
 
                     closeModal();
                   }}
+
                 />
               </div>
             )}
@@ -238,6 +241,9 @@ const Page = () => {
                       <span className="font-semibold text-black text-sm ">
                         ITEM NAME
                       </span>
+                    </li>
+                    <li className="w-1/3 lg:w-1/6 lg:border-r-2 border-[#DEDEDE] text-center py-4 hover:cursor-pointer">
+                      <span className="font-semibold text-black text-sm">SKU CODE</span>
                     </li>
                     <li className="w-1/3 lg:w-1/6 lg:border-r-2 border-[#DEDEDE] text-center py-4 hover:cursor-pointer">
                       <span className="font-semibold text-black text-sm">
@@ -282,22 +288,26 @@ const Page = () => {
                           setStockItems((prev) => [newItem, ...prev]);
                           closeModal();
                         }}
+
                       />
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <Table className="  overflow-y-auto">
+              <Table className="border-collapse  overflow-y-auto">
                 <TableHeader>
                   <TableRow className="h-[50px]">
-                    <TableHead className="px-4 py-2 w-2/7 text-left border-b border-r">
+                    <TableHead className="px-4 max-[400px]:px-1 py-2 w-2/7 max-[500px]:w-1/3 text-left border-b border-r">
                       ITEM NAME
                     </TableHead>
-                    <TableHead className="px-4 py-2 w-1/7 text-center border-b border-r">
+                    <TableHead className="px-4 max-[400px]:px-1 py-2 w-1/7 max-[500px]:w-1/3 text-center border-b border-r">
+                      SKU CODE
+                    </TableHead>
+                    <TableHead className="px-4 max-[400px]:px-1 py-2 w-1/7 max-[500px]:w-1/3 text-center border-b border-r">
                       PRICE
                     </TableHead>
-                    <TableHead className="px-4 py-2 w-1/7 text-center border-b border-r hidden sm:table-cell">
+                    <TableHead className="px-4 py-2 w-1/7  text-center border-b border-r hidden sm:table-cell">
                       QUANTITY
                     </TableHead>
                     <TableHead className="px-4 py-2 w-1/7 text-center border-b hidden sm:table-cell">
@@ -305,20 +315,18 @@ const Page = () => {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className=" border border-b-2">
-                  {Array.from({
-                    //   length: Math.max(rowsPerPage, stockItems.length),
-                    // }).map((_, index) => {
-                    //   const item = stockItems[index] || null;
-                    length: Math.max(rowsPerPage, getPaginatedItems().length),
-                  }).map((_, index) => {
+                <TableBody>
+                  {Array.from({ length: getPaginatedItems().length }).map((_, index) => {
                     const item = getPaginatedItems()[index] || null
                     return (
                       <TableRow key={index} className="h-[50px]">
-                        <TableCell className="px-4 py-3 text-left border-r">
+                        <TableCell className="px-4 max-[400px]:px-1 py-2 w-2/7 max-[500px]:w-1/3 text-left border-r ">
                           {item ? item.name : ""}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-center border-r">
+                        <TableCell className="px-4 max-[400px]:px-1 py-2 w-1/7 max-[500px]:w-1/3 text-center border-r">
+                          {"SKU-CODE"}
+                        </TableCell>
+                        <TableCell className="px-4 max-[400px]:px-1 py-2 w-1/7 max-[500px]:w-1/3 text-center border-r">
                           {item
                             ? `${item.currency_code
                             } ${item.buying_price?.toLocaleString()}`
@@ -356,17 +364,15 @@ const Page = () => {
                 </TableBody>
               </Table>
             )}
-            {stockItems.length > 0 ?
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                pageSize={itemsPerPage}
-                totalItems={stockItems.length}
-                onPageChangeAction={setCurrentPage} 
-                onPageSizeChangeAction={handlePageSizeChange }      
-              /> :
-              <>  </>
-            }
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={itemsPerPage}
+              totalItems={stockItems.length}
+              onPageChangeAction={setCurrentPage}
+              onPageSizeChangeAction={handlePageSizeChange}
+              stockItems={stockItems}
+            />
           </div>
         </div>
       </div>
